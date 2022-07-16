@@ -24,7 +24,12 @@ namespace DNote.Controllers
         // GET: Notes
         public async Task<IActionResult> Index()
         {
-              return _context.Note != null ? 
+            ViewBag.Categories = new string[1000];
+            foreach(var cat in _context.Category.ToList())
+            {
+                ViewBag.Categories[cat.id] = cat.CategoryName;
+            }
+            return _context.Note != null ? 
                           View(await _context.Note.ToListAsync()) :
                           Problem("Entity set 'ApplicationDbContext.Note'  is null.");
         }
@@ -33,10 +38,29 @@ namespace DNote.Controllers
         {
             return View();
         }
+        // GET: Notes/List
+        public async Task<IActionResult> List(int? id)
+        {
+            ViewBag.Categories = new string[1000];
+            foreach (var cat in _context.Category.ToList())
+            {
+                ViewBag.Categories[cat.id] = cat.CategoryName;
+            }
+            if (id == null)
+                return View("Index");
+            return _context.Note != null ?
+                          View("Index", await _context.Note.Where(i => i.CategoryId == id).ToListAsync()) :
+                          Problem("Entity set 'ApplicationDbContext.Note'  is null.");
+        }
         // POST: Notes/Find
         [HttpPost]
         public async Task<IActionResult> Find(string SearchPhrase)
         {
+            ViewBag.Categories = new string[1000];
+            foreach (var cat in _context.Category.ToList())
+            {
+                ViewBag.Categories[cat.id] = cat.CategoryName;
+            }
             return _context.Note != null ?
                           View("Index", await _context.Note.Where(n => ( n.Author == User.Identity.Name && n.Name.Contains(SearchPhrase))).ToListAsync()) :
                           Problem("Entity set 'ApplicationDbContext.Note'  is null.");
@@ -56,21 +80,27 @@ namespace DNote.Controllers
             {
                 return NotFound();
             }
-
+            ViewData["CategoryName"] = GetCategoriesList().Find(i => i.id == note.CategoryId).CategoryName;
             return View(note);
         }
 
         // GET: Notes/Create
         public IActionResult Create()
         {
+            ViewBag.ListOfCategories = GetCategoriesList();
+            return View();
+        }
+        private List<Category> GetCategoriesList(Note? note = null)
+        {
             var categoryList = new List<Category>();
-            foreach(var cat in _context.Category)
+            foreach (var cat in _context.Category)
             {
-                categoryList.Insert(0, new Category { id=cat.id, CategoryName=cat.CategoryName });
+                categoryList.Insert(0, new Category { id = cat.id, CategoryName = cat.CategoryName });
             }
             categoryList.Insert(0, new Category { id = 0, CategoryName = "Select category" });
-            ViewBag.ListOfCategories = categoryList;
-            return View();
+            if(!Equals(null, note))
+                categoryList.Insert(0, new Category { id = note.CategoryId, CategoryName = _context.Category.Where(cat => cat.id == note.CategoryId).Select(cat => cat.CategoryName).SingleOrDefault() });
+            return categoryList;
         }
 
         // POST: Notes/Create
@@ -102,6 +132,7 @@ namespace DNote.Controllers
             {
                 return NotFound();
             }
+            ViewBag.ListOfCategories = GetCategoriesList(note);
             return View(note);
         }
 

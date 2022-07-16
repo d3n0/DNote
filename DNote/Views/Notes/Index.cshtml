@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<DNote.Models.Note>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "All Notes";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -37,7 +37,7 @@
                 @Html.DisplayFor(modelItem => item.Content)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.CategoryId)
+                @Html.ActionLink((String)ViewBag.Categories[item.CategoryId], "List", "Notes", new {id = item.CategoryId}, null)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Author)

@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<DNote.Models.Category>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "All Categories";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -22,7 +22,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.CategoryName)
+                @Html.ActionLink(item.CategoryName,"List","Notes", new {id = item.id})
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.id">Edit</a> |
